@@ -5,7 +5,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseArrayPipe,
   ParseIntPipe,
   Post,
   Put,
@@ -22,7 +21,6 @@ import {
   BookValidator,
   CreateManyBooksValidator,
 } from './validations/book.validator';
-import { array } from 'zod';
 
 @ApiTags('Books')
 @Controller('books')
@@ -44,6 +42,23 @@ export class BookManagerController {
   @Get('')
   async allBooks() {
     return this.service.listBooks();
+  }
+
+  /*
+   * Return all books but sorted in specified order by specified fields
+   */
+  @Get('sort')
+  async sortBooks(
+    @Query('order') order: 'asc' | 'desc',
+    @Query('field') field: keyof BookDTO,
+  ) {
+    if (!order) {
+      throw new BadRequestException('order should be either "asc" or "desc"');
+    }
+    if (!field) {
+      throw new BadRequestException('Specify field to sort with.');
+    }
+    return this.service.listBooks({ order, field });
   }
 
   @Get('threshold')

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BookMemoryStore } from 'src/shared/db';
+import { BookMemoryStore, SortOrder } from 'src/shared/db';
 
 import { BookDTO } from './dto/book.dto';
 
@@ -16,7 +16,10 @@ export class BookManagerService {
     return books;
   }
 
-  async listBooks() {
+  async listBooks(sortOptions?: SortOrder) {
+    if (sortOptions) {
+      return this.bookStore.findMany({ order: sortOptions });
+    }
     return this.bookStore.findMany();
   }
 

@@ -7,7 +7,7 @@ type Book = {
   price: number;
 };
 
-type SortOrder = {
+export type SortOrder = {
   field: keyof Book;
   order: 'asc' | 'desc';
 };
