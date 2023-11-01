@@ -30,7 +30,10 @@ type FindManyOptions = {
 
 @Injectable()
 export class BookMemoryStore {
+  /** Our book data store is a simple array. We'll leverage Nest's DoI container and Singleton instances to instantiate this just once */
   private books: Book[];
+
+  /** We'll use Javascript's object to maintain an index, this reduces many lookups to an O(1) operation rather than O(n) */
   private indices: Record<string, number>;
 
   constructor() {
