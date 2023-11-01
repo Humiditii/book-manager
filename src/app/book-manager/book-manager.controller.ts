@@ -103,7 +103,10 @@ export class BookManagerController {
   }
 
   /**
-   * Return books filtered by a list of IDs
+   * Return books filtered by a list of IDs.
+   * It should be noted that for this to show as a list you need to have
+   * multiple "id" query parameters.
+   * e.g = ?id=<id>&id=<id>&id=<id>
    */
   @ApiOkResponse({
     description: 'Books titles returned',

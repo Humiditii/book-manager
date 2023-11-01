@@ -118,7 +118,7 @@ export class BookMemoryStore {
    * Apply filtering on a books array based on the passed clause. This effectively filters the array based on the properties of the clause
    * argument.
    * @param data Data to run filter on
-   * @param clause Clause to filter with
+   * @param clauseFields Clause to filter with
    */
   private applyWhereClause(data: Book[], clauseFields: WhereFields) {
     const d = data.filter((e) => {
@@ -140,8 +140,7 @@ export class BookMemoryStore {
               elementReturns = e[field] >= f[clause];
               break;
             case '$in':
-              const x = f[clause];
-              elementReturns = x.includes(e[field]);
+              elementReturns = f[clause].includes(e[field]);
               break;
           }
 
