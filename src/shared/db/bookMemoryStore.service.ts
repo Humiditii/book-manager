@@ -31,14 +31,19 @@ type FindManyOptions = {
 @Injectable()
 export class BookMemoryStore {
   private books: Book[];
+  private indices: Record<string, number>;
 
   constructor() {
     this.books = [];
+    this.indices = {};
   }
 
   create(book: Omit<Book, 'id'>) {
     const newBook: Book = { ...book, id: uuidv4() };
-    this.books.push(newBook);
+    const newlen = this.books.push(newBook);
+
+    this.indices[newBook.id] = newlen - 1;
+
     return newBook;
   }
 
@@ -76,13 +81,17 @@ export class BookMemoryStore {
   }
 
   findOne(id: string) {
-    const book = this.books.find((b) => b.id === id);
+    const bookIndex = this.indices[id];
+    if (typeof bookIndex !== 'number') {
+      return null;
+    }
+    const book = this.books[bookIndex];
     return book ? book : null;
   }
 
   update(id: string, data: Omit<Book, 'id'>) {
-    const bookIndex = this.books.findIndex((b) => b.id == id);
-    if (bookIndex < 0) {
+    const bookIndex = this.indices[id];
+    if (typeof bookIndex !== 'number') {
       return null;
     }
 
@@ -94,12 +103,14 @@ export class BookMemoryStore {
   }
 
   delete(id: string) {
-    const bookIndex = this.books.findIndex((b) => b.id == id);
-    if (bookIndex < 0) {
+    const bookIndex = this.indices[id];
+    if (typeof bookIndex !== 'number') {
       return null;
     }
+
     const book = this.books[bookIndex];
     this.books.splice(bookIndex, 1);
+    this.rebuildIndex();
     return book;
   }
 
@@ -181,5 +192,17 @@ export class BookMemoryStore {
       return v;
     });
     return b;
+  }
+
+  /**
+   * After deleting record we need to rebuild our index records, because we're not using sparse as data store the other records are
+   * pushed forward to fill the empty space thereby invalidating our index record.
+   * And expensive operation to perform any time a delete happens but N is always small here, and this is a toy project anyway.
+   */
+  private rebuildIndex() {
+    this.indices = {};
+    this.books.forEach((e, i) => {
+      this.indices[e.id] = i;
+    });
   }
 }

@@ -18,6 +18,12 @@ describe('BookStore core functionalities', () => {
     expect(books.length).toEqual(2);
   });
 
+  it('Return null if book does not exist', () => {
+    const store = new BookMemoryStore();
+    const book = store.findOne('Non-existent id');
+    expect(book).toEqual(null);
+  });
+
   it('books can be filtered by price', () => {
     const store = new BookMemoryStore();
     store.createMany([
