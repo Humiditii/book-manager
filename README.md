@@ -25,7 +25,7 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-The Swagger doc is in `{{server_url}}/api/v1/docs`
+The Swagger doc is in `{{server_url}}/docs`
 
 ## Test
 
