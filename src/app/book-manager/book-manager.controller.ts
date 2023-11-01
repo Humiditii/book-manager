@@ -11,12 +11,22 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { ZodValidationPipe } from 'src/shared/pipes/validator';
 
 import { BookManagerService } from './book-manager.service';
 import { BookDTO } from './dto/book.dto';
+import {
+  BookResponseDto,
+  ValidationFailedResponseDto,
+} from './dto/response.dto';
 import {
   BookValidator,
   CreateManyBooksValidator,
@@ -27,26 +37,46 @@ import {
 export class BookManagerController {
   constructor(private service: BookManagerService) {}
 
+  /**
+   * Create new book and return it.
+   */
+  @ApiCreatedResponse({ description: 'Book created', type: BookResponseDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed',
+    type: ValidationFailedResponseDto,
+  })
   @UsePipes(new ZodValidationPipe(BookValidator))
   @Post('create')
   async create(@Body() data: BookDTO) {
     return this.service.createBook(data);
   }
 
+  /**
+   * Create many books and return
+   */
+  @ApiCreatedResponse({
+    description: 'Books created.',
+    type: [BookResponseDto],
+  })
   @UsePipes(new ZodValidationPipe(CreateManyBooksValidator))
   @Post('create-many')
   async createMany(@Body() data: [BookDTO]) {
     return this.service.createManyBooks(data);
   }
 
+  /**
+   * Return all books
+   */
+  @ApiOkResponse({ description: 'All books', type: [BookResponseDto] })
   @Get('')
   async allBooks() {
     return this.service.listBooks();
   }
 
-  /*
+  /**
    * Return all books but sorted in specified order by specified fields
    */
+  @ApiOkResponse({ description: 'Sorted books', type: [BookResponseDto] })
   @Get('sort')
   async sortBooks(
     @Query('order') order: 'asc' | 'desc',
@@ -61,6 +91,9 @@ export class BookManagerController {
     return this.service.listBooks({ order, field });
   }
 
+  /**
+   *Get book titles within a certain price threshold
+   */
   @Get('threshold')
   async booksWithinThreshold(@Query('price', ParseIntPipe) price: number) {
     if (!price) {
@@ -69,6 +102,13 @@ export class BookManagerController {
     return this.service.getBooksForPriceThreshold(price);
   }
 
+  /**
+   * Return books filtered by a list of IDs
+   */
+  @ApiOkResponse({
+    description: 'Books titles returned',
+    type: [BookResponseDto],
+  })
   @Get('books-by-id')
   async getMultipleBooksById(@Query('id') id: [string]) {
     if (!Array.isArray(id)) {
@@ -80,17 +120,36 @@ export class BookManagerController {
     return this.service.getBooksWithId(id);
   }
 
+  /**
+   * Get one book by id
+   */
+  @ApiOkResponse({ description: 'Book retrieved', type: BookResponseDto })
+  @ApiNotFoundResponse({ description: 'Book not found' })
   @Get(':id')
   async oneBook(@Param('id') id: string) {
     return this.service.oneBook(id);
   }
 
+  /**
+   *Update book by id
+   */
+  @ApiOkResponse({ description: 'Book Updated', type: BookResponseDto })
+  @ApiBadRequestResponse({
+    description: 'Validation failed',
+    type: ValidationFailedResponseDto,
+  })
+  @ApiNotFoundResponse({ description: 'Book not found' })
   @UsePipes(new ZodValidationPipe(BookValidator))
   @Put(':id')
   async update(@Param('id') id: string, @Body() data: BookDTO) {
     return this.service.updateBook(id, data);
   }
 
+  /**
+   * Delete book by id
+   */
+  @ApiOkResponse({ description: 'Book Deleted', type: BookResponseDto })
+  @ApiNotFoundResponse({ description: 'Book not found' })
   @Delete(':id')
   async deleteBook(@Param('id') id: string) {
     return this.service.deleteBook(id);
