@@ -4,11 +4,11 @@ import {
   ArgumentMetadata,
   BadRequestException,
 } from '@nestjs/common';
-import { ZodObject } from 'zod';
+import { z } from 'zod';
 
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: ZodObject<any>) {}
+  constructor(private schema: z.Schema) {}
 
   transform(value: unknown, metadata: ArgumentMetadata) {
     if (metadata.type === 'body') {
@@ -19,6 +19,7 @@ export class ZodValidationPipe implements PipeTransform {
         const error = result.error.flatten();
         throw new BadRequestException({
           errors: error.fieldErrors,
+          formError: error.formErrors,
           message: 'Validation failed.',
         });
       }

@@ -11,8 +11,26 @@ export class BookManagerService {
     return book;
   }
 
+  async createManyBooks(data: [BookDTO]) {
+    const books = this.bookStore.createMany(data);
+    return books;
+  }
+
   async listBooks() {
-    return this.bookStore.all();
+    return this.bookStore.findMany();
+  }
+
+  async getBooksForPriceThreshold(threshold: number) {
+    return this.bookStore.findMany({
+      where: { price: { $gte: threshold } },
+      select: ['title'],
+    });
+  }
+
+  async getBooksWithId(idArray: [string]) {
+    return this.bookStore.findMany({
+      where: { id: { $in: idArray } },
+    });
   }
 
   async oneBook(id: string) {
